@@ -81,4 +81,16 @@ class User extends Authenticatable implements JWTSubject
         $user_id = $token['sub'];
         return User::find($user_id);
     }
+
+
+
+
+
+
+
+
+    //Lets create the relationships
+    public function auditLogs(){
+        return $this->hasMany(AuditLog::class);
+    }
 }

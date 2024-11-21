@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('test', [AuthController::class, 'test']);
 Route::post('login', [AuthController::class, 'login']);
-Route::post('register', [AuthController::class, 'register']);
+
 
 // authenticated routes to require jwt validation
 Route::middleware('jwt.auth')->group(function(){
@@ -36,6 +36,8 @@ Route::middleware('jwt.auth')->group(function(){
         Route::get('getBranchesAndRoles', [BranchController::class, 'getBranchesAndRoles']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('register', [AuthController::class, 'register']);
+
+        require_once __DIR__.'/routeCollection/logRoutes.php';
 
     });
     

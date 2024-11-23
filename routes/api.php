@@ -24,6 +24,8 @@ Route::get('test', [AuthController::class, 'test']);
 Route::post('login', [AuthController::class, 'login']);
 
 
+require_once __DIR__.'/routeCollection/logRoutes.php';
+
 // authenticated routes to require jwt validation
 Route::middleware('jwt.auth')->group(function(){
 
@@ -34,11 +36,11 @@ Route::middleware('jwt.auth')->group(function(){
         Route::put('branches', [BranchController::class, 'update']);
         Route::delete('branches', [BranchController::class, 'destroy']);
         Route::get('getBranchesAndRoles', [BranchController::class, 'getBranchesAndRoles']);
-        Route::post('logout', [AuthController::class, 'logout']);
         Route::post('register', [AuthController::class, 'register']);
 
-        require_once __DIR__.'/routeCollection/logRoutes.php';
-
     });
+
+
+    Route::post('logout', [AuthController::class, 'logout']);
     
 });

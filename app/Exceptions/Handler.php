@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Models\ErrorLog;
+use App\Models\User;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Throwable;
@@ -29,6 +30,7 @@ class Handler extends ExceptionHandler
             //
         });
 
+        // To be uncommented during production
         $this->renderable(function (Throwable $e, $request) {
             return $this->handleException($e, $request);
         });
@@ -36,9 +38,12 @@ class Handler extends ExceptionHandler
 
     private function handleException(Throwable $exception, $request): JsonResponse 
     {
+        //echo $exception->getMessage();
+
+
         // Default response format
         $response = [
-            'success' => false,
+            'status' => "failed",
             'message' => $exception->getMessage(),
         ];
 
@@ -50,14 +55,35 @@ class Handler extends ExceptionHandler
         } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
             $response['message'] = 'Route Not Found';
             $status = 404;
+        } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException) {
+            $response['message'] = 'Unauthorized!';
+            $status = 401;
+        } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
+            $response['message'] = 'Access denied!';
+            $status = 403;
         } else {
-            $response['message'] = 'Server Error';
+            //$response['message'] = 'Server Error';
+            // $response['message'] = $exception->__toString();
+            $response['message'] = $exception->getMessage();
             $status = 500;
         }
 
         // Log the exception if needed
-        ErrorLog::create([]);
+        ErrorLog::create([
+            "class" => get_class($exception), 
+            "method_and_line_number" => $this->getFunctionName($exception).' LINE NUMBER : '.$exception->getLine(), 
+            "error_description" => $exception->getMessage(), 
+            "related_user" => User::getLoggedInUserEmail(), 
+            "related_user_ip" => request()->ip()
+        ]);
 
         return response()->json($response, $status);
     }
+
+    protected function getFunctionName(Throwable $exception): ?string
+    {
+        $trace = $exception->getTrace();
+        return $trace[0]['function'] ?? null;
+    }
+
 }

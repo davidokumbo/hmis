@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -70,16 +71,42 @@ class User extends Authenticatable implements JWTSubject
     }
 
     // function to get user_id from jwttoken
-    public static function getUserId(){
+    public static function getUserIdFromToken(){
         $token = JWTAuth::parseToken()->getPayload()->toArray();
         return $token['sub'];
     }
     
     //function to get all user details from users table
-    public static function getUser(){
-        $token = JWTAuth::parseToken()->getPayload()->toArray();
-        $user_id = $token['sub'];
-        return User::find($user_id);
+    public static function getUserFromToken(){
+        return User::find(User::getUserIdFromToken());
+    }
+
+    public static function getLoggedInUser(){
+        return Auth::user();
+    }
+
+    public static function getLoggedInUserEmail(){
+        $user = User::getLoggedInUser();
+
+        if($user){
+            return $user->email;
+        }
+
+        return null;
+    }
+
+    public static function getLoggedInUserId(){
+        $user = User::getLoggedInUser();
+
+        if($user){
+            return $user->id;
+        }
+
+        return null;
+    }
+
+    public static function getUserIp(){
+        return request()->ip();
     }
 
 

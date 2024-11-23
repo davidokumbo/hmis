@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('class');
             $table->string('method_and_line_number');
             $table->string('error_description');
-            $table->unsignedBigInteger('related_user');
+            $table->unsignedBigInteger('related_user')->nullable();
             $table->string('related_user_ip');
             $table->timestamps();
 
@@ -34,4 +34,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('error_log');
     }
+
+    
 };

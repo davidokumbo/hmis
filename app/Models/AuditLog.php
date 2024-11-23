@@ -11,6 +11,20 @@ class AuditLog extends Model
 
     protected $table = "audit_log";
 
+    protected $fillable = [
+        'operation_type',
+        'description',
+        'related_user'
+    ];
+
+    
+    //ensuring related user is selected or pinned to the audit log 
+    public function user(){
+        return $this->belongsTo(User::class, 'related_user');
+    }
+
+
+    //Static function tied to this model
     public static function createAuditLog($operation_type, $description, $related_user){
 
         AuditLog::create([
@@ -20,13 +34,11 @@ class AuditLog extends Model
         ]);
     }
 
-    public function user(){
-        return $this->belongsTo(User::class);
-    }
-
     public static function getAuditLogs($user, $action){
-        $query = AuditLog::select('id')
-                    ->with(['user:id,email']); // Load only the 'id' and 'email' from the related user
+        $query = AuditLog::select('audit_log.id', 'audit_log.operation_type', 'audit_log.description', 'audit_log.description')
+                        ->with(['user' => function ($query) {
+                            $query->select('id as user_id', 'email as user_email');
+                        }]); // Load only the 'id' and 'email' from the related user
 
         if(!is_null($user)){
             $query->where("user.id", $user)
@@ -38,6 +50,12 @@ class AuditLog extends Model
                     ->orWhere('audit_log.description','LIKE', '%'.$action.'%');
         }
 
-        return $query->get();
+        return $query->get()                    
+                    ->map(function ($log) {
+                        $logArray = $log->toArray();
+                        $user = $logArray['user'] ?? ['user_id'=>null, 'user_email'=>null];
+                        unset($logArray['user']);
+                        return array_merge($logArray, $user);
+                    });
     }
 }

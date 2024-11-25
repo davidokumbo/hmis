@@ -20,7 +20,7 @@ class AuditLog extends Model
     
     //ensuring related user is selected or pinned to the audit log 
     public function user(){
-        return $this->belongsTo(User::class, 'related_user');
+        return $this->belongsTo(User::class, 'related_user', 'id');
     }
 
 
@@ -35,10 +35,17 @@ class AuditLog extends Model
     }
 
     public static function getAuditLogs($user, $action){
-        $query = AuditLog::select('audit_log.id', 'audit_log.operation_type', 'audit_log.description', 'audit_log.description')
+        $query = AuditLog::select('audit_log.id AS audit_id', 'audit_log.operation_type', 'audit_log.description', 'audit_log.description', 'audit_log.related_user')
                         ->with(['user' => function ($query) {
-                            $query->select('id as user_id', 'email as user_email');
+                            $query->select('users.id', 'users.email');
                         }]); // Load only the 'id' and 'email' from the related user
+
+        // $query = AuditLog::select('audit_log.id', 'audit_log.operation_type', 'audit_log.description', 'audit_log.description', 'audit_log.related_user')
+        // ->with(['user' => function ($query) {
+        //     $query->select('id', 'email');
+        // }])->get();
+
+        // echo($query);
 
         if(!is_null($user)){
             $query->where("user.id", $user)
@@ -50,12 +57,18 @@ class AuditLog extends Model
                     ->orWhere('audit_log.description','LIKE', '%'.$action.'%');
         }
 
-        return $query->get()                    
+        return $query->get()
                     ->map(function ($log) {
                         $logArray = $log->toArray();
-                        $user = $logArray['user'] ?? ['user_id'=>null, 'user_email'=>null];
+                        $user = $logArray['user'] ?? ['id'=>null, 'email'=>null];
+                        $userTransformed = [
+                            'user_id' => $user['id'],
+                            'user_email' => $user['email']
+                        ];
                         unset($logArray['user']);
-                        return array_merge($logArray, $user);
+                        return array_merge($logArray, $userTransformed);
                     });
+                           
+        
     }
 }

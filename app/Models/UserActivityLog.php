@@ -22,7 +22,7 @@ class UserActivityLog extends Model
 
     //Ensuring relationship during selection
     public function user(){
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public static function createUserActivityLog($operation_type, $description){
@@ -43,9 +43,9 @@ class UserActivityLog extends Model
 
 
     public static function getUserActivityLogs($operation_type, $description, $user_id, $is_logged_in, $ip_address){
-        $query = UserActivityLog::select('user_activity_log.id', 'user_activity_log.operation_type', 'user_activity_log.description', 'user_activity_log.is_logged_in', 'user_activity_log.ip_address')
+        $query = UserActivityLog::select('user_activity_log.id', 'user_activity_log.operation_type', 'user_activity_log.description', 'user_activity_log.is_logged_in', 'user_activity_log.ip_address', 'user_activity_log.user_id')
                         ->with(['user' => function ($query) {
-                            $query->select('id as user_id', 'email as user_email');
+                            $query->select('users.id', 'users.email');
                         }]); // Load only the 'id' and 'email' from the related user
 
         if($operation_type){
@@ -73,8 +73,12 @@ class UserActivityLog extends Model
                     ->map(function ($log) {
                         $logArray = $log->toArray();
                         $user = $logArray['user'] ?? ['user_id'=>null, 'user_email'=>null];
+                        $userTransformed = [
+                            'user_id' => $user['id'],
+                            'user_email' => $user['email']
+                        ];
                         unset($logArray['user']);
-                        return array_merge($logArray, $user);
+                        return array_merge($logArray, $userTransformed);
                     });
     }
 

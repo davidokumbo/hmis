@@ -21,7 +21,7 @@ class ErrorLog extends Model
 
     //ensuring retionship with user is maintained during selection
     public function user(){
-        return $this->belongsTo(User::class, 'related_user');
+        return $this->belongsTo(User::class, 'related_user', 'id');
     }
 
 
@@ -37,9 +37,9 @@ class ErrorLog extends Model
     }
 
     public static function getErrorLogs($class, $method_and_line_number, $error_description, $related_user, $related_user_ip){
-        $query = ErrorLog::select('error_log.id', 'error_log.class', 'error_log.method_and_line_number', 'error_log.error_description', 'error_log.related_user_ip')
+        $query = ErrorLog::select('error_log.id', 'error_log.class', 'error_log.method_and_line_number', 'error_log.error_description', 'error_log.related_user_ip', 'error_log.related_user')
                         ->with(['user' => function ($query) {
-                            $query->select('id as user_id', 'email as user_email');
+                            $query->select('users.id', 'users.email');
                         }]);
         
         
@@ -64,9 +64,13 @@ class ErrorLog extends Model
                     ->get()                    
                     ->map(function ($log) {
                         $logArray = $log->toArray(); // Convert the log to an array
-                        $user = $logArray['user'] ?? ['user_email'=>null]; // Get the user array or an empty array if no user exists
-                        unset($logArray['user']); // Remove the nested user key
-                        return array_merge($logArray, $user); // Merge the user data into the parent array;
+                        $user = $logArray['user'] ?? ['id' => null, 'email'=>null];
+                        $userTransformed = [
+                            'user_id' => $user['id'],
+                            'user_email' => $user['email']
+                        ];
+                        unset($logArray['user']);
+                        return array_merge($logArray, $userTransformed); // Merge the user data into the parent array;
                     });
 
     }

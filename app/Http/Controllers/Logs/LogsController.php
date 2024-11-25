@@ -20,7 +20,7 @@ class LogsController extends Controller
     //get All Audit Logs
     public function getAuditLogs(Request $request){
         //test audit log creation
-        AuditLog::createAuditLog("TEST", "THIS IS A TEST LOG", User::getLoggedInUserId());
+        //AuditLog::createAuditLog("TEST", "THIS IS A TEST LOG", User::getLoggedInUserId());
         return response()->json(AuditLog::getAuditLogs($request->user, $request->action), 200);
     }
 

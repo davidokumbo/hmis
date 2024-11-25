@@ -16,7 +16,7 @@ class RoleCheckMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        $user = User::getUser();
+        $user = User::getLoggedInUser();
         if($user->hasAnyRole($roles)){
             return $next($request);
             

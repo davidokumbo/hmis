@@ -72,7 +72,7 @@ class UserActivityLog extends Model
         return $query->get()                    
                     ->map(function ($log) {
                         $logArray = $log->toArray();
-                        $user = $logArray['user'] ?? ['user_id'=>null, 'user_email'=>null];
+                        $user = $logArray['user'] ?? ['id'=>null, 'email'=>null];
                         $userTransformed = [
                             'original_user_id' => $user['id'],
                             'user_email' => $user['email']

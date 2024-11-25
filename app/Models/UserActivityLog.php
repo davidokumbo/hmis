@@ -74,7 +74,7 @@ class UserActivityLog extends Model
                         $logArray = $log->toArray();
                         $user = $logArray['user'] ?? ['user_id'=>null, 'user_email'=>null];
                         $userTransformed = [
-                            'user_id' => $user['id'],
+                            'original_user_id' => $user['id'],
                             'user_email' => $user['email']
                         ];
                         unset($logArray['user']);

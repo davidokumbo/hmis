@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('updated_by');
-            $table->unsignedBigInteger('approved_by');
+            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at');
-            $table->unsignedBigInteger('disabled_by');
+            $table->unsignedBigInteger('disabled_by')->nullable();
             $table->timestamp('disabled_at');
             $table->timestamps();
 

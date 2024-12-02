@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use App\Models\ErrorLog;
 use App\Models\User;
+use App\Utils\APIConstants;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Throwable;
@@ -38,7 +39,9 @@ class Handler extends ExceptionHandler
 
     private function handleException(Throwable $exception, $request): JsonResponse 
     {
-        //echo $exception->getMessage();
+        // echo $exception->getMessage();
+
+        // echo $exception;
 
 
         // Default response format
@@ -49,18 +52,25 @@ class Handler extends ExceptionHandler
 
         // Customize response based on the exception type
         if ($exception instanceof \Illuminate\Validation\ValidationException) {
-            $response['message'] = 'Validation Error';
+            $response['message'] = APIConstants::VALIDATION_ERROR;
             $response['errors'] = $exception->errors();
             $status = 422;
         } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
-            $response['message'] = 'Route Not Found';
+            $response['message'] = APIConstants::ROUTE_NOT_FOUND;
             $status = 404;
         } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException) {
-            $response['message'] = 'Unauthorized!';
+            $response['message'] = APIConstants::UNAUTHORIZED_ACCESS;
             $status = 401;
         } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException) {
-            $response['message'] = 'Access denied!';
+            $response['message'] = APIConstants::ACCESS_DENIED;
             $status = 403;
+        } elseif ($exception instanceof \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException){
+            $response['message'] = APIConstants::METHOD_NOT_ALLOWED;
+            $response['errors'] = $exception->getMessage();
+            $status = 405;
+        } elseif ($exception instanceof \App\Exceptions\AlreadyExistsException){
+            $response['message'] = $exception->getMessage() ." ". APIConstants::MESSAGE_ALREADY_EXISTS;
+            $status = 422;
         } else {
             //$response['message'] = 'Server Error';
             // $response['message'] = $exception->__toString();
@@ -72,8 +82,8 @@ class Handler extends ExceptionHandler
         ErrorLog::create([
             "class" => get_class($exception), 
             "method_and_line_number" => $this->getFunctionName($exception).' LINE NUMBER : '.$exception->getLine(), 
-            "error_description" => $exception->getMessage(), 
-            "related_user" => User::getUserFromToken(), 
+            "error_description" => substr($exception->getMessage(), 0, 254), 
+            "related_user" => User::getUserFromToken()->id, 
             "related_user_ip" => request()->ip()
         ]);
 

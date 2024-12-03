@@ -39,6 +39,7 @@ Route::middleware('jwt.auth')->group(function(){
 
         require_once __DIR__.'/routeCollection/logRoutes.php';
         require_once __DIR__.'/routeCollection/adminRoutes.php';
+        require_once __DIR__.'/routeCollection/employeeRoutes.php';
 
     });
 

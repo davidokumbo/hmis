@@ -37,7 +37,7 @@ class ErrorLog extends Model
     }
 
     public static function getErrorLogs($class, $method_and_line_number, $error_description, $related_user, $related_user_ip){
-        $query = ErrorLog::select('error_log.id', 'error_log.class', 'error_log.method_and_line_number', 'error_log.error_description', 'error_log.related_user_ip', 'error_log.related_user')
+        $query = ErrorLog::select('error_log.id', 'error_log.class', 'error_log.method_and_line_number', 'error_log.error_description', 'error_log.related_user_ip', 'error_log.related_user', 'error_log.created_at')
                         ->with(['user' => function ($query) {
                             $query->select('users.id', 'users.email');
                         }]);

@@ -43,7 +43,7 @@ class UserActivityLog extends Model
 
 
     public static function getUserActivityLogs($operation_type, $description, $user_id, $is_logged_in, $ip_address){
-        $query = UserActivityLog::select('user_activity_log.id', 'user_activity_log.operation_type', 'user_activity_log.description', 'user_activity_log.is_logged_in', 'user_activity_log.ip_address', 'user_activity_log.user_id')
+        $query = UserActivityLog::select('user_activity_log.id', 'user_activity_log.operation_type', 'user_activity_log.description', 'user_activity_log.is_logged_in', 'user_activity_log.ip_address', 'user_activity_log.user_id', 'user_activity_log.created_at')
                         ->with(['user' => function ($query) {
                             $query->select('users.id', 'users.email');
                         }]); // Load only the 'id' and 'email' from the related user

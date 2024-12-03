@@ -35,7 +35,7 @@ class AuditLog extends Model
     }
 
     public static function getAuditLogs($user, $action){
-        $query = AuditLog::select('audit_log.id AS audit_id', 'audit_log.operation_type', 'audit_log.description', 'audit_log.description', 'audit_log.related_user')
+        $query = AuditLog::select('audit_log.id AS audit_id', 'audit_log.operation_type', 'audit_log.description', 'audit_log.description', 'audit_log.related_user', 'audit_log.created_at')
                         ->with(['user' => function ($query) {
                             $query->select('users.id', 'users.email');
                         }]); // Load only the 'id' and 'email' from the related user

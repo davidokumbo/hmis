@@ -15,22 +15,25 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('account')->unique();
-            $table->string('initiate_url');
-            $table->string('bill_url');
-            $table->string('authentication_url');
-            $table->string('validation_url');
-            $table->string('balance_url');
-            $table->string('bridge_balance_url');
-            $table->string('other_url');
-            $table->string('username');
-            $table->string('password');
-            $table->string('other_details');
+            $table->string('initiate_url')->nullable();
+            $table->string('bill_url')->nullable();
+            $table->string('authentication_url')->nullable();
+            $table->string('validation_url')->nullable();
+            $table->string('balance_url')->nullable();
+            $table->string('bridge_balance_url')->nullable();
+            $table->string('other_url')->nullable();
+            $table->string('username')->nullable();
+            $table->string('password')->nullable();
+            $table->string('other_details')->nullable();
+            $table->text('description')->nullable();
             $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->unsignedBigInteger('disabled_by')->nullable();
             $table->timestamp('disabled_at')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
             $table->foreign('created_by') // Column name
@@ -50,6 +53,11 @@ return new class extends Migration
                 ->onDelete('cascade');
 
             $table->foreign('disabled_by') // Column name
+                ->references('id') // Target column in the parent table
+                ->on('users') // Parent table
+                ->onDelete('cascade');
+
+            $table->foreign('deleted_by') // Column name
                 ->references('id') // Target column in the parent table
                 ->on('users') // Parent table
                 ->onDelete('cascade');

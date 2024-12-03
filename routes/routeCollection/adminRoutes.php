@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EmployeeController;
 use Illuminate\Support\Facades\Route;
 
+//department routes
 Route::group(['prefix'=>'departments'], function(){
 
     Route::post('create', [DepartmentController::class, 'createDepartment']);

@@ -57,7 +57,8 @@ class AuditLog extends Model
                     ->orWhere('audit_log.description','LIKE', '%'.$action.'%');
         }
 
-        return $query->get()
+        return $query->orderBy('audit_log.created_at', "DESC")
+                    ->get()
                     ->map(function ($log) {
                         $logArray = $log->toArray();
                         $user = $logArray['user'] ?? ['id'=>null, 'email'=>null];

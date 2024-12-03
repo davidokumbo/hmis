@@ -18,13 +18,13 @@ class DepartmentController extends Controller
             'name' => 'required|string|min:3|max:255|unique:departments'
         ]);
 
-        // This is a test logic to show how you can throw a sample error with a message, check how the
-        // class is created and hanled in the handler class....
-        //this logic is not needed because it is already checked in above validation
-        $existing = Department::selectDepartments(null, $request->name);
-        if(count($existing) > 0){
-            throw new AlreadyExistsException(APIConstants::NAME_DEPARTMENT);
-        }
+        // // This is a test logic to show how you can throw a sample error with a message, check how the
+        // // class is created and hanled in the handler class....
+        // //this logic is not needed because it is already checked in above validation
+        // $existing = Department::selectDepartments(null, $request->name);
+        // if(count($existing) > 0){
+        //     throw new AlreadyExistsException(APIConstants::NAME_DEPARTMENT);
+        // }
 
         Department::create([
             'name' => $request->name,

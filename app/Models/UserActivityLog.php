@@ -69,7 +69,8 @@ class UserActivityLog extends Model
             $query->where('user_activity_log.ip_address', $ip_address);
         }
 
-        return $query->get()                    
+        return $query->orderBy('user_activity_log.created_at', "DESC")
+                    ->get()                    
                     ->map(function ($log) {
                         $logArray = $log->toArray();
                         $user = $logArray['user'] ?? ['id'=>null, 'email'=>null];

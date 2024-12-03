@@ -8,6 +8,7 @@ use App\Exceptions\NotFoundException;
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Department;
 use App\Models\User;
+use App\Models\UserActivityLog;
 use App\Utils\APIConstants;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -33,6 +34,8 @@ class DepartmentController extends Controller
             'created_by' => Auth::user()->id
         ]);
 
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_CREATE, "Created a department with name: ". $request->name);
+
         return response()->json(
             Department::selectDepartments(null, $request->name)
         ,200);
@@ -56,6 +59,9 @@ class DepartmentController extends Controller
                     'updated_by' => User::getLoggedInUserId()
                 ]);
 
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_UPDATE, "Updated a department with id: ". $request->id);
+        
+
         return response()->json(
             Department::selectDepartments($request->id, $request->name)
         ,200);
@@ -68,14 +74,29 @@ class DepartmentController extends Controller
             throw new InputsValidationException("id or name required!");
         }
 
+        $department = Department::selectDepartments($request->id, $request->name);
+
+        if(count($department) < 1){
+            throw new NotFoundException(APIConstants::NAME_DEPARTMENT);
+        }
+
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_GET, "Fetched a department with id: ". $department[0]['id']);
+
+
         return response()->json(
-            Department::selectDepartments($request->id, $request->name)
+            $department
         ,200);
     }
 
     public function getAllDepartments(){
+
+        $departments = Department::selectDepartments(null, null);
+
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_GET, "Fetched all department");
+
+
         return response()->json(
-            Department::selectDepartments(null, null)
+            $departments
         ,200);
     }
 
@@ -94,6 +115,8 @@ class DepartmentController extends Controller
                     'disabled_by' => null,
                     'disabled_at' => null,
                 ]);
+
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_APPROVE, "Approved a department with id: ". $id);
 
         return response()->json(
             Department::selectDepartments($id, null)
@@ -115,6 +138,8 @@ class DepartmentController extends Controller
                     'disabled_by' => User::getLoggedInUserId(),
                     'disabled_at' => Carbon::now(),
                 ]);
+
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_DISABLE, "Disabled a department with id: ". $id);
 
         return response()->json(
             Department::selectDepartments($id, null)

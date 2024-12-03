@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Branch;
+use App\Models\UserActivityLog;
+use App\Utils\APIConstants;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +47,9 @@ class AuthController extends Controller
             $user->assignRole($request->role);
     
             DB::commit();
+            
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_CREATE, "Created a user with email: ". $user->email);
+
             return response()->json([
                 'name' => $user->name,
                 'email' => $user->email,
@@ -111,6 +116,9 @@ class AuthController extends Controller
             }
     
             $user = Auth::user();
+            
+            UserActivityLog::createUserActivityLog("LOGIN", "User logged in........ Email : ". $user->email);
+
             return response()->json([
                     'id' => $user->id,
                     'name' => $user->name,
@@ -138,7 +146,11 @@ class AuthController extends Controller
     // logout function
     public function logout()
     {
+        $user =  Auth::user();
         Auth::logout();
+            
+        UserActivityLog::createUserActivityLog("LOGGET OUT", "User logged out........ Email : ". $user->email);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully logged out',
@@ -148,6 +160,10 @@ class AuthController extends Controller
     // function to refresh jwt token
     public function refresh()
     {
+        $user = Auth::user();
+        
+        UserActivityLog::createUserActivityLog("REFRESHING_TOKEN", "User refreshed token........ Email : ". $user->email);
+
         return response()->json([
             'status' => 'success',
             'user' => Auth::user(),

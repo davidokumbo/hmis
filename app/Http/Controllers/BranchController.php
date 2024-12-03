@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\User;
+use App\Models\UserActivityLog;
+use App\Utils\APIConstants;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +20,8 @@ class BranchController extends Controller
                 ->where('deleted_at', null)
                 ->select('id', 'name', 'active', 'deleted_by', 'deleted_at')
                 ->get();
+
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_GET, "Fetched all branches");
 
             return response()->json($all, 200);
         }
@@ -40,6 +44,9 @@ class BranchController extends Controller
             ]);
     
             DB::commit();
+
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_CREATE, "Created a brach with name: ". $request->name);
+
             return response()->json([
                 "id"=> $branch->id,
                 "name"=> $branch->name,
@@ -68,6 +75,9 @@ class BranchController extends Controller
             $all = Branch::where('id', $request->id)
                 ->select('id', 'name', 'active', 'deleted_by', 'deleted_at')
                 ->get();
+
+            
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_GET, "Fetched all branches");
 
             return response()->json($all, 200);
 
@@ -106,6 +116,9 @@ class BranchController extends Controller
                 ]);
 
             DB::commit();
+
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_UPDATE, "Updated a branch with id: ". $request->id);
+
             return response()->json([
                 "id"=>$request->id,
                 "name"=>$request->name,
@@ -152,6 +165,9 @@ class BranchController extends Controller
                 ]);
 
             DB::commit();
+            
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_DISABLE, "Disabled a branch with id: ". $request->id);
+
             return response()->json([
                 "id"=>$request->id, 
                 'deleted_by'=>User::getUserId(), 
@@ -181,6 +197,8 @@ class BranchController extends Controller
 
             $roles = Role::select('name')
                 ->get();
+
+            UserActivityLog::createUserActivityLog(APIConstants::NAME_GET, "Getting branches and roles: ");
 
             return response()->json([
                 "branches"=>$branches,

@@ -89,7 +89,7 @@ class Handler extends ExceptionHandler
             "class" => get_class($exception), 
             "method_and_line_number" => $this->getFunctionName($exception).' LINE NUMBER : '.$exception->getLine(), 
             "error_description" => substr($exception->getMessage(), 0, 254), 
-            "related_user" => User::getUserFromToken()->id, 
+            "related_user" => User::getLoggedInUserId(), 
             "related_user_ip" => request()->ip()
         ]);
 

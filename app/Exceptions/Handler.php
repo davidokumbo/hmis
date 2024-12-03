@@ -71,6 +71,12 @@ class Handler extends ExceptionHandler
         } elseif ($exception instanceof \App\Exceptions\AlreadyExistsException){
             $response['message'] = $exception->getMessage() ." ". APIConstants::MESSAGE_ALREADY_EXISTS;
             $status = 422;
+        } elseif ($exception instanceof \App\Exceptions\NotFoundException){
+            $response['message'] = $exception->getMessage() ." ". APIConstants::MESSAGE_NOT_FOUND;
+            $status = 404;
+        } elseif ($exception instanceof \App\Exceptions\InputsValidationException){
+            $response['message'] = $exception->getMessage() ." ". APIConstants::MESSAGE_MISSING_OR_INVALID_INPUTS;
+            $status = 422;
         } else {
             //$response['message'] = 'Server Error';
             // $response['message'] = $exception->__toString();

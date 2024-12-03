@@ -21,6 +21,8 @@ class APIConstants
 
 
     public const MESSAGE_ALREADY_EXISTS = 'Already exists';
+    public const MESSAGE_NOT_FOUND = 'Not found';
+    public const MESSAGE_MISSING_OR_INVALID_INPUTS = 'Missing or ivalid inputs';
 
 
     public const NAME_DEPARTMENT = 'Department';

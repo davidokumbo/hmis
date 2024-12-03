@@ -71,10 +71,21 @@ class Lcobucci extends Provider implements JWT
         $secret,
         $algo,
         array $keys,
-        $config = null
+        $config = null,
     ) {
         parent::__construct($secret, $algo, $keys);
+        $this->generateConfig($config);
+    }
 
+    /**
+     * Generate the config.
+     *
+     * @param Configuration $config optional, to pass an existing configuration to be used
+     *
+     * @return void
+     */
+    private function generateConfig($config = null)
+    {
         $this->signer = $this->getSigner();
 
         if (!is_null($config)) {
@@ -89,6 +100,21 @@ class Lcobucci extends Provider implements JWT
                 new SignedWith($this->signer, $this->getVerificationKey()),
             );
         }
+    }
+
+    /**
+     * Set the secret used to sign the token and regenerate the config using the secret.
+     *
+     * @param string $secret
+     *
+     * @return $this
+     */
+    public function setSecret($secret)
+    {
+        $this->secret = $secret;
+        $this->generateConfig();
+
+        return $this;
     }
 
     /**
@@ -132,7 +158,7 @@ class Lcobucci extends Provider implements JWT
 
         try {
             foreach ($payload as $key => $value) {
-                $this->addClaim($key, $value);
+                $this->builder = $this->addClaim($key, $value);
             }
 
             return $this->builder->getToken($this->config->signer(), $this->config->signingKey())->toString();
@@ -179,41 +205,22 @@ class Lcobucci extends Provider implements JWT
      *
      * @param string $key
      */
-    protected function addClaim($key, $value)
+    protected function addClaim($key, $value): Builder
     {
         if (!isset($this->builder)) {
             $this->builder = $this->config->builder();
         }
 
-        switch ($key) {
-            case RegisteredClaims::ID:
-                $this->builder->identifiedBy($value);
-                break;
-            case RegisteredClaims::EXPIRATION_TIME:
-                $this->builder->expiresAt(\DateTimeImmutable::createFromFormat('U', $value));
-                break;
-            case RegisteredClaims::NOT_BEFORE:
-                $this->builder->canOnlyBeUsedAfter(\DateTimeImmutable::createFromFormat('U', $value));
-                break;
-            case RegisteredClaims::ISSUED_AT:
-                $this->builder->issuedAt(\DateTimeImmutable::createFromFormat('U', $value));
-                break;
-            case RegisteredClaims::ISSUER:
-                $this->builder->issuedBy($value);
-                break;
-            case RegisteredClaims::AUDIENCE:
-                if (is_array($value)) {
-                    $this->builder->permittedFor(...$value);
-                } else {
-                    $this->builder->permittedFor($value);
-                }
-                break;
-            case RegisteredClaims::SUBJECT:
-                $this->builder->relatedTo($value);
-                break;
-            default:
-                $this->builder->withClaim($key, $value);
-        }
+        return match ($key) {
+            RegisteredClaims::ID => $this->builder->identifiedBy($value),
+            RegisteredClaims::EXPIRATION_TIME => $this->builder->expiresAt(\DateTimeImmutable::createFromFormat('U', $value)),
+            RegisteredClaims::NOT_BEFORE => $this->builder->canOnlyBeUsedAfter(\DateTimeImmutable::createFromFormat('U', $value)),
+            RegisteredClaims::ISSUED_AT => $this->builder->issuedAt(\DateTimeImmutable::createFromFormat('U', $value)),
+            RegisteredClaims::ISSUER => $this->builder->issuedBy($value),
+            RegisteredClaims::AUDIENCE => is_array($value) ? $this->builder->permittedFor(...$value) : $this->builder->permittedFor($value),
+            RegisteredClaims::SUBJECT => $this->builder->relatedTo($value),
+            default => $this->builder->withClaim($key, $value),
+        };
     }
 
     /**
@@ -230,10 +237,6 @@ class Lcobucci extends Provider implements JWT
         }
 
         $signer = $this->signers[$this->algo];
-
-        if (is_subclass_of($signer, Ecdsa::class)) {
-            return $signer::create();
-        }
 
         return new $signer();
     }

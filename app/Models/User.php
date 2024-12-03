@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -72,13 +73,26 @@ class User extends Authenticatable implements JWTSubject
 
     // function to get user_id from jwttoken
     public static function getUserIdFromToken(){
-        $token = JWTAuth::parseToken()->getPayload()->toArray();
-        return $token['sub'];
+        try{
+
+            $token = JWTAuth::parseToken()->getPayload()->toArray();
+            return $token['sub'];
+        }
+
+        catch(JWTException){
+            return null;
+        }
     }
     
     //function to get all user details from users table
     public static function getUserFromToken(){
-        return User::find(User::getUserIdFromToken());
+        $user_id = User::getUserIdFromToken();
+
+        if($user_id == null){
+            return null;
+        }
+
+        return User::find($user_id);
     }
 
     public static function getLoggedInUser(){
@@ -120,4 +134,5 @@ class User extends Authenticatable implements JWTSubject
     public function auditLogs(){
         return $this->hasMany(AuditLog::class);
     }
+
 }

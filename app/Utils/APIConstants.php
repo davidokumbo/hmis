@@ -25,5 +25,14 @@ class APIConstants
     public const MESSAGE_MISSING_OR_INVALID_INPUTS = 'Missing or ivalid inputs';
 
 
+
+    public const NAME_CREATE = 'CREATE';
+    public const NAME_UPDATE = 'UPDATE';
+    public const NAME_GET = 'GET';
+    public const NAME_APPROVE = 'APPROVE';
+    public const NAME_DISABLE = 'DISABLE';
+    public const NAME_DELETE = 'DELETE';
+
+
     public const NAME_DEPARTMENT = 'Department';
 }

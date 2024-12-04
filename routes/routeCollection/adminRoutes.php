@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\SchemesController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix'=>'departments'], function(){
@@ -33,6 +34,7 @@ Route::group(['prefix'=>'employees'], function(){
     Route::put('approve/{id}', [EmployeeController::class, 'approveEmployee']);
     Route::put('disable/{id}', [EmployeeController::class, 'disableEmployee']);;
 
+});
 //schemes routes 
 Route::group(['prefix'=>'schemes'], function(){
 

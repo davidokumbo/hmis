@@ -37,5 +37,9 @@ class APIConstants
 
 
     public const NAME_DEPARTMENT = 'Department';
+<<<<<<< HEAD
+=======
+    public const NAME_EMPLOYEE = 'Employee';
+>>>>>>> 6da176b4013e3500d1a2c8740ad6dacbbab2fc9c
     public const NAME_SCHEME = 'Scheme';
 }

@@ -27,6 +27,6 @@ Route::group(['prefix'=>'schemes'], function(){
     Route::put('approve/{id}', [SchemesController::class, 'approveScheme']);
     Route::put('disable/{id}', [SchemesController::class, 'disableScheme']);
     Route::put('softDelete/{id}', [SchemesController::class, 'softDeleteScheme']);
-    Route::put('permanentlyDelete/{id}', [SchemesController::class, 'permanentDeleteScheme']);
+    Route::delete('permanentlyDelete/{id}', [SchemesController::class, 'permanentDeleteScheme']);
 
 });

@@ -48,8 +48,8 @@ class Scheme extends Model
             'updatedBy:id,email',
             'approvedBy:id,email',
             'disabledBy:id,email'
-        ])->whereIsNull('schemes.deleted_by')
-          ->whereIsNull('schemes.deleted_at');
+        ])->whereNull('schemes.deleted_by')
+          ->whereNull('schemes.deleted_at');
 
         if($id != null){
             $schemes_query->where('schemes.id', $id);

@@ -105,7 +105,7 @@ class SchemesController extends Controller
 
         $existing = Scheme::where('name', $request->name)
                         ->orWhere('account', $request->account)
-                        ->whereIsNull('deleted_by')
+                        ->whereNull('deleted_by')
                         ->get();
         
         if(count($existing) == 0){
@@ -221,7 +221,7 @@ class SchemesController extends Controller
     public function permanentDeleteScheme($id){
         
 
-        $existing = Scheme::selectSchemes($id, null);
+        $existing = Scheme::where('id', $id)->get();
         
         if(count($existing) == 0){
             throw new NotFoundException(APIConstants::NAME_SCHEME);

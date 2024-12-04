@@ -21,6 +21,7 @@ return new class extends Migration
             $table->unsignedBigInteger('disabled_by')->nullable();
             $table->timestamp('disabled_at');
             $table->timestamps();
+            
 
             $table->foreign('created_by') // Column name
                   ->references('id') // Target column in the parent table

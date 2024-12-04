@@ -28,6 +28,7 @@ class AuthController extends Controller
                 'active' => 'required|boolean|',
                 'password' => 'required|string|min:6|max:64',
                 'role' => 'required|string|min:2|max:255|exists:roles,name'
+                
             ]);
             DB::beginTransaction();
             $branches = Branch::where('id', $request->branch_id)->get();

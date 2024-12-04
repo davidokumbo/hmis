@@ -8,6 +8,7 @@ class APIConstants
     public const SUCCESS_MESSAGE = 'Operation completed successfully';
     public const RESOURCE_CREATED = 'Resource has been created successfully';
 
+
     // Error messages
     public const INVALID_REQUEST = 'Invalid request data provided';
     public const RESOURCE_NOT_FOUND = 'Requested resource not found';
@@ -36,5 +37,6 @@ class APIConstants
 
 
     public const NAME_DEPARTMENT = 'Department';
+    public const NAME_EMPLOYEE = 'Employee';
     public const NAME_SCHEME = 'Scheme';
 }

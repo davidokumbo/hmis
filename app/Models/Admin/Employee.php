@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Admin;
 use App\Models\User;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -51,7 +51,7 @@ class Employee extends Model
 
 
     //perform selection
-    public static function selectEmployees($id, $employee_name){
+    public static function selectEmployees($id, $ipnumber, $employee_code){
         $employees_query = Employee::with([
             'createdBy:id,email',
             'updatedBy:id,email',
@@ -62,8 +62,12 @@ class Employee extends Model
         if($id != null){
             $employees_query->where('employees.id', $id);
         }
-        elseif($employee_name != null){
-            $employees_query->where('employees.employee_name', $employee_name);
+        elseif($ipnumber != null){
+            $employees_query->where('employees.ipnumber', $ipnumber);
+        }
+
+        elseif($employee_code != null){
+            $employees_query->where('employees.employee_code', $employee_code);
         }
 
         return $employees_query->get()->map(function ($employee) {

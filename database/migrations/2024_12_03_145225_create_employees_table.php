@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('ipnumber')->unique();
             $table->string('employee_name');
             $table->string('employee_code')->unique();
-            $table->integer('age');
+            $table->integer('age')->nullable();;
             $table->date('dob');
             $table->string('role');
             $table->string('speciality');
@@ -25,7 +25,7 @@ return new class extends Migration
             $table->timestamp('approved_at')->nullable();
             $table->unsignedBigInteger('disabled_by')->nullable();
             $table->timestamp('disabled_at')->nullable();
-            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('created_by');
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
 

@@ -31,8 +31,10 @@ class APIConstants
     public const NAME_GET = 'GET';
     public const NAME_APPROVE = 'APPROVE';
     public const NAME_DISABLE = 'DISABLE';
-    public const NAME_DELETE = 'DELETE';
+    public const NAME_SOFT_DELETE = 'SOFT_DELETE';
+    public const NAME_PERMANENT_DELETE = 'PERMANENT_DELETE';
 
 
     public const NAME_DEPARTMENT = 'Department';
+    public const NAME_SCHEME = 'Scheme';
 }

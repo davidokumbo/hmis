@@ -21,4 +21,17 @@ Route::group(['prefix'=>'employees'], function(){
     Route::get('', [EmployeeController::class, 'getAllEmployees']);
     Route::put('approve/{id}', [EmployeeController::class, 'approveEmployee']);
     Route::put('disable/{id}', [EmployeeController::class, 'disableEmployee']);;
+
+//schemes routes 
+Route::group(['prefix'=>'schemes'], function(){
+
+    Route::post('create', [SchemesController::class, 'createScheme']);
+    Route::put('update', [SchemesController::class, 'updateScheme']);
+    Route::get('get', [SchemesController::class, 'getSingleScheme']);
+    Route::get('', [SchemesController::class, 'getAllSchemes']);
+    Route::put('approve/{id}', [SchemesController::class, 'approveScheme']);
+    Route::put('disable/{id}', [SchemesController::class, 'disableScheme']);
+    Route::put('softDelete/{id}', [SchemesController::class, 'softDeleteScheme']);
+    Route::delete('permanentlyDelete/{id}', [SchemesController::class, 'permanentDeleteScheme']);
+
 });

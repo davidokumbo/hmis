@@ -63,13 +63,15 @@ class PatientController extends Controller
             'firstname' => 'string|min:2|max:30',
             'lastname'=>'string|min:2|max:255',
             'dob' => 'date|before:today',
-            'phonenumber1' => 'required|string|min:12|max:20|regex:/^\+?[0-9]{10,20}$/',
-            'phonenumber2' => 'string|min:12|max:20|regex:/^\+?[0-9]{10,20}$/',
-            'email' => 'string|email|max:255|unique:patients',
+            'phonenumber1' => 'required|string|min:10|max:20|regex:/^\+?[0-9]{10,20}$/',
+            'phonenumber2' => 'string|min:10|max:20|regex:/^\+?[0-9]{10,20}$/',
+            'email' => 'string|email|max:255',
             'address' => 'string|min:3|max:50',
             'residence' => 'string|min:3|max:50' 
         ]);
 
+        $request-> phonenumber1 == $request-> phonenumber2 ? throw new InputsValidationException("Provided phone numbers should be different!") : null ;
+         
         if(!is_null($request->email)){
             $existing = Patient::selectPatients(null, $request->email, null);
 

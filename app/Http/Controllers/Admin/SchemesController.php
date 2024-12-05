@@ -233,7 +233,7 @@ class SchemesController extends Controller
         UserActivityLog::createUserActivityLog(APIConstants::NAME_PERMANENT_DELETE, "Permenently deleted a Scheme with name: ". $existing[0]['name']);
 
         return response()->json(
-                Scheme::selectSchemes($id, null)
+                []
             ,200);
     }
 }

@@ -39,4 +39,5 @@ class APIConstants
     public const NAME_DEPARTMENT = 'Department';
     public const NAME_EMPLOYEE = 'Employee';
     public const NAME_SCHEME = 'Scheme';
+    public const NAME_PATIENT = 'Patient';
 }

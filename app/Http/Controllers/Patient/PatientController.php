@@ -30,6 +30,8 @@ class PatientController extends Controller
             'residence' => 'required|string|min:3|max:255'
             
         ]);
+
+        $request-> phonenumber1 == $request-> phonenumber2 ? throw new InputsValidationException("Provided phone numbers should be different!") : null ;
             
         $patient_code = $this->generatePatientCode();
 

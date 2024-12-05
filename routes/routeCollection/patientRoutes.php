@@ -11,5 +11,6 @@ Route::group(['prefix'=>'patients'], function(){
     Route::get('', [PatientController::class, 'getAllPatients']);
     Route::put('approve/{id}', [PatientController::class, 'approvePatient']);
     Route::put('disable/{id}', [PatientController::class, 'disablePatient']);
-    Route::put('delete/{id}', [PatientController::class, 'deletePatient']);
+    Route::put('softDelete/{id}', [PatientController::class, 'softDelete']);
+    Route::put('permanentlyDelete/{id}', [PatientController::class, 'permanentlyDelete']);
 });

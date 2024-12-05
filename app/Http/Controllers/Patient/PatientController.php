@@ -194,7 +194,7 @@ class PatientController extends Controller
                 ]);
 
 
-        UserActivityLog::createUserActivityLog(APIConstants::NAME_SOFT_DELETE, "Deleted a patient with id: ". $id);
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_SOFT_DELETE, "Trashed a patient with id: ". $id);
 
         return response()->json(
             Patient::selectPatients($id, null, null)
@@ -203,23 +203,19 @@ class PatientController extends Controller
 
     public function permanentlyDelete($id){
             
-        $existing = Patient::selectPatients($id, null, null);
+        $existing = Patient::where('id',$id)->get();
 
         if(count($existing) < 1){
             throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id);
         }
         
-        Patient::where('id', $id)
-                ->update([
-                    'deleted_at' => now(),
-                    'deleted_by' => User::getLoggedInUserId(),
-                ]);
+        Patient::destroy($id);
 
 
-        UserActivityLog::createUserActivityLog(APIConstants::NAME_SOFT_DELETE, "Deleted a patient with id: ". $id);
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_PERMANENT_DELETE, "Deleted a patient with id: ". $id);
 
         return response()->json(
-            Patient::selectPatients($id, null, null)
+            []
         ,200);
     }
 

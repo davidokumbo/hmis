@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
+            $table->string('patient_code')->unique();
             $table->string('firstname');
             $table->string('lastname');
             $table->date('dob');
@@ -31,30 +32,30 @@ return new class extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
 
-            // $table->foreign('created_by')
-            //         ->references('id')
-            //         ->on('users')
-            //         ->onDelete('cascade');
+            $table->foreign('created_by')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
 
-            // $table->foreign('approved_by')
-            //         ->references('id')
-            //         ->on('users')
-            //         ->onDelete('cascade');
+            $table->foreign('approved_by')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
 
-            // $table->foreign('updated_by')
-            //         ->references('id')
-            //         ->on('users')
-            //         ->onDelete('cascade');
+            $table->foreign('updated_by')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
 
-            // $table->foreign('disabled_by')
-            //         ->references('id')
-            //         ->on('users')
-            //         ->onDelete('cascade');
+            $table->foreign('disabled_by')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
 
-            // $table->foreign('deleted_by')
-            //         ->references('id')
-            //         ->on('users')
-            //         ->onDelete('cascade');
+            $table->foreign('deleted_by')
+                    ->references('id')
+                    ->on('users')
+                    ->onDelete('cascade');
         });
     }
 

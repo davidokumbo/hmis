@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Patient\PatientController;
+use Illuminate\Support\Facades\Route;
+
 
 Route::group(['prefix'=>'patients'], function(){
     Route::post('create', [PatientController::class, 'createPatient']);

@@ -4,7 +4,7 @@ namespace App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-
+use App\Utils\CustomUserRelations;
 
 class Patient extends Model
 {
@@ -13,6 +13,7 @@ class Patient extends Model
     protected $table = "patients";
 
     protected $fillable = [
+        'patient_code',
         'firstname',
         'lastname',
         'dob',
@@ -32,39 +33,17 @@ class Patient extends Model
     ];
 
 
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedBy()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function approvedBy()
-    {
-        return $this->belongsTo(User::class, 'approved_by');
-    }
-
-    public function disabledBy()
-    {
-        return $this->belongsTo(User::class, 'disabled_by');
-    }
-    public function deletedBy()
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
+    use CustomUserRelations;
 
 
     //perform selection
-    public static function selectPatients($id, $email){
+    public static function selectPatients($id, $email, $patient_code){
         $patients_query = Patient::with([
             'createdBy:id,email',
             'updatedBy:id,email',
             'approvedBy:id,email',
             'disabledBy:id,email'
-        ]);
+        ])->whereNull('patients.deleted_by');
 
         if($id != null){
             $patients_query->where('patients.id', $id);
@@ -72,10 +51,14 @@ class Patient extends Model
         elseif($email != null){
             $patients_query->where('patients.email', $email);
         }
+        elseif($patient_code != null){
+            $patients_query->where('patients.patient_code', $patient_code);
+        }
 
         return $patients_query->get()->map(function ($patient) {
-            return [
+            $patient_details = [
                 'id' => $patient->id,
+                'patient_code'=>$patient->patient_code,
                 'patient_firstname' => $patient->firstname,
                 'patient_lastname' => $patient->lastname,
                 'dob' => $patient->dob,
@@ -83,19 +66,13 @@ class Patient extends Model
                 'phonenumber2' => $patient->phonenumber2,
                 'email' => $patient->email,
                 'address' => $patient->address,
-                'residence' => $patient->residence,
-                'created_by' => $patient->createdBy ? $patient->createdBy->email : null,
-                'created_at' => $patient->created_at,
-                'updated_by' => $patient->updatedBy ? $patient->updatedBy->email : null,
-                'updated_at' => $patient->updated_at,
-                'approved_by' => $patient->approvedBy ? $patient->approvedBy->email : null,
-                'approved_at' => $patient->approved_at,
-                'disabled_by' => $patient->disabledBy ? $patient->disabledBy->email : null,
-                'disabled_at' => $patient->disabled_at,
-                'deleted_by' => $patient->deleted_by ? $patient->deletedBy->email : null,
-                'deleted_at' => $patient->deleted_at,        
+                'residence' => $patient->residence,       
 
             ];
+
+            $related_user = CustomUserRelations::relatedUsersDetails($patient);
+
+            return array_merge($patient_details, $related_user);
         });
     }
 }

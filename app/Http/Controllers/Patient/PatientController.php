@@ -20,19 +20,21 @@ class PatientController extends Controller
     //saving a new patient
     public function createPatient(Request $request){
         $request->validate([
-            'firstname' => 'required|string|min:2|max:30',
-            'lastname'=>'required|string|min:2|max:255',
+            'firstname' => 'required|string|min:2|max:100',
+            'lastname'=>'required|string|min:2|max:100',
             'dob' => 'required|date|before:today',
-            'phonenumber1' => 'required|string|min:12|max:20|regex:/^\+?[0-9]{10,20}$/',
-            'phonenumber2' => 'string|min:12|max:20|regex:/^\+?[0-9]{10,20}$/',
-            'email' => 'required|string|min:5|max:50',
-            'address' => 'required|string|min:3|max:50',
-            'residence' => 'required|string|min:3|max:50'
+            'phonenumber1' => 'required|string|min:10|max:20|regex:/^\+?[0-9]{10,20}$/',
+            'phonenumber2' => 'string|min:10|max:20|regex:/^\+?[0-9]{10,20}$/',
+            'email' => 'required|string|email|max:255|unique:patients',
+            'address' => 'required|string|min:3|max:255',
+            'residence' => 'required|string|min:3|max:255'
             
         ]);
             
+        $patient_code = $this->generatePatientCode();
 
         Patient::create([
+            'patient_code' => $patient_code,
             'firstname' => $request->firstname, 
             'lastname' => $request->lastname,
             'phonenumber1'=>$request->phonenumber1,
@@ -41,13 +43,13 @@ class PatientController extends Controller
             'dob' => $request->dob,
             'address'=>$request->address,
             'residence'=>$request->residence,
-            'created_by' => Auth::user()->id
+            'created_by' => User::getLoggedInUserId()
         ]);
 
-        UserActivityLog::createUserActivityLog(APIConstants::NAME_CREATE, "Created a patient with name: ". $request->firstname . $request->lastname);
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_CREATE, "Created a patient with code: ". $patient_code);
 
         return response()->json(
-            Patient::selectPatients(null, $request->email)
+            Patient::selectPatients(null, null, $patient_code)
         ,200);
 
     }
@@ -55,22 +57,27 @@ class PatientController extends Controller
    // updating a patient
     public function updatePatient(Request $request){
         $request->validate([
+            'id' => 'required|integer|min:0|exists:users,id',
             'firstname' => 'string|min:2|max:30',
             'lastname'=>'string|min:2|max:255',
             'dob' => 'date|before:today',
             'phonenumber1' => 'required|string|min:12|max:20|regex:/^\+?[0-9]{10,20}$/',
             'phonenumber2' => 'string|min:12|max:20|regex:/^\+?[0-9]{10,20}$/',
+            'email' => 'string|email|max:255|unique:patients',
             'address' => 'string|min:3|max:50',
             'residence' => 'string|min:3|max:50' 
         ]);
 
-        $existing = Patient::selectPatients(null, $request->email);
+        if(!is_null($request->email)){
+            $existing = Patient::selectPatients(null, $request->email, null);
 
-        if(count($existing) > 0 && $existing[0]["email"] != $request->email){
-            throw new AlreadyExistsException(APIConstants::NAME_PATIENT. " ". $request->email);
+            if(count($existing) > 0 && $existing[0]["id"] != $request->id){
+                throw new AlreadyExistsException(APIConstants::NAME_PATIENT. " ". $request->email);
+            }
         }
+        
 
-        Patient::where('email', $request->email)
+        Patient::where('id', $request->id)
                 ->update([
                     'firstname' => $request->firstname, 
                     'lastname' => $request->lastname,
@@ -78,26 +85,27 @@ class PatientController extends Controller
                     'phonenumber2'=>$request->phonenumber2,
                     'dob' => $request->dob,
                     'address'=>$request->address,
+                    'email'=>$request->email,
                     'residence'=>$request->residence,
                     'updated_by' => User::getLoggedInUserId()
                 ]);
 
-        UserActivityLog::createUserActivityLog(APIConstants::NAME_UPDATE, "Updated a patient with email: ". $request->email);
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_UPDATE, "Updated a patient with id: ". $request->id);
         
 
         return response()->json(
-            Patient::selectPatients(null, $request->email)
+            Patient::selectPatients($request->id, null, null)
             ,200);
 
     }
     //Gettind a single patients details 
     public function getSinglePatient(Request $request){
 
-        if($request->id == null && $request->email == null){
-            throw new InputsValidationException("id or email required!");
+        if($request->id == null && $request->email == null && $request->patient_code == null){
+            throw new InputsValidationException("id or email or patient code required!");
         }
 
-        $patient = Patient::selectPatients($request->id, $request->email);
+        $patient = Patient::selectPatients($request->id, $request->email, $request->patient_code);
 
         if(count($patient) < 1){
             throw new NotFoundException(APIConstants::NAME_PATIENT);
@@ -112,7 +120,7 @@ class PatientController extends Controller
     //getting all patients Details
     public function getAllPatients(){
 
-        $patients = Patient::selectPatients(null, null);
+        $patients = Patient::selectPatients(null, null, null);
 
         UserActivityLog::createUserActivityLog(APIConstants::NAME_GET, "Fetched all patients");
 
@@ -125,17 +133,10 @@ class PatientController extends Controller
     //approving a patient
     public function approvePatient($id){
             
-        $existing = Patient::selectPatients($id, null);
+        $existing = Patient::selectPatients($id, null, null);
 
         if(count($existing) < 1){
             throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id);
-        }
-
-        $PatientNotDeleted = Patient::where('id', $id)
-                                     ->whereNull('deleted_by')
-                                     ->get();
-        if ($PatientNotDeleted->isEmpty()) {
-        throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id . " was deleted.");
         }
 
         Patient::where('id', $id)
@@ -149,24 +150,17 @@ class PatientController extends Controller
         UserActivityLog::createUserActivityLog(APIConstants::NAME_APPROVE, "Approved a patient with id : ". $id);
 
         return response()->json(
-            Patient::selectPatients($id, null)
+            Patient::selectPatients($id, null, null)
         ,200);
     }
 
     // Disabling a patient
     public function disablePatient($id){
             
-        $existing = Patient::selectPatients($id, null);
+        $existing = Patient::selectPatients($id, null, null);
 
         if(count($existing) < 1){
             throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id);
-        }
-
-        $PatientnotDeleted = Patient::where('id', $id)
-                                   ->whereNull('deleted_by')
-                                   ->get();
-        if ($PatientnotDeleted->isEmpty()) {
-            throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id . " was deleted.");
         }
         
         Patient::where('id', $id)
@@ -185,19 +179,12 @@ class PatientController extends Controller
         ,200);
     }
 
-    public function deletePatient($id){
+    public function softDelete($id){
             
-        $existing = Patient::selectPatients($id, null);
+        $existing = Patient::selectPatients($id, null, null);
 
         if(count($existing) < 1){
             throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id);
-        }
-
-        $PatientnotDeleted = Patient::where('id', $id)
-                                   ->whereNull('deleted_by')
-                                   ->get();
-        if ($PatientnotDeleted->isEmpty()) {
-            throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id . "was deleted.");
         }
         
         Patient::where('id', $id)
@@ -207,10 +194,49 @@ class PatientController extends Controller
                 ]);
 
 
-        UserActivityLog::createUserActivityLog(APIConstants::NAME_DISABLE, "Deleted a patient with id: ". $id);
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_SOFT_DELETE, "Deleted a patient with id: ". $id);
 
         return response()->json(
             Patient::selectPatients($id, null, null)
         ,200);
+    }
+
+    public function permanentlyDelete($id){
+            
+        $existing = Patient::selectPatients($id, null, null);
+
+        if(count($existing) < 1){
+            throw new NotFoundException(APIConstants::NAME_PATIENT. " with id: ". $id);
+        }
+        
+        Patient::where('id', $id)
+                ->update([
+                    'deleted_at' => now(),
+                    'deleted_by' => User::getLoggedInUserId(),
+                ]);
+
+
+        UserActivityLog::createUserActivityLog(APIConstants::NAME_SOFT_DELETE, "Deleted a patient with id: ". $id);
+
+        return response()->json(
+            Patient::selectPatients($id, null, null)
+        ,200);
+    }
+
+    //function to generate employeecode
+    private function generatePatientCode(){
+        // Generate a random six-digit number
+        $randomNumber = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
+
+        // Add the EMP prefix
+        $patient_code = 'PTN' . $randomNumber;
+
+        // Check if the code already exists in the database
+        while (Patient::where('patient_code', $patient_code)->exists()) {
+            $randomNumber = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
+            $patient_code = 'PTN' . $randomNumber;
+        }
+
+        return $patient_code;
     }
 }

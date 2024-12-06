@@ -223,7 +223,7 @@ class PatientController extends Controller
         ,200);
     }
 
-    //function to generate employeecode
+    //function to generate patientcode
     private function generatePatientCode(){
         // Generate a random six-digit number
         $randomNumber = str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT);
